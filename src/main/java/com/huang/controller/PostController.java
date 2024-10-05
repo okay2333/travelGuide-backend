@@ -69,6 +69,8 @@ public class PostController {
         }
         postService.validPost(post, true);
         User loginUser = userService.getLoginUser(request);
+        // TODO 调试
+        System.out.println("***当前登录ID"+loginUser.getId());
         post.setUserId(loginUser.getId());
         post.setFavourNum(0);
         post.setThumbNum(0);
