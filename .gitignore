@@ -7,7 +7,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 # 忽略 application-*.yml 文件
-application.yml
+src/main/resources/application.yml
+
 ### STS ###
 .apt_generated
 .classpath
