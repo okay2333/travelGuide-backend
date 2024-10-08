@@ -100,7 +100,7 @@ wx:
 # todo 需替换配置
 cos:
   client:
-    accessKey: xxx
+    accessKey: xxxtest
     secretKey: xxx
     region: xxx
     bucket: xxx
