@@ -1,5 +1,6 @@
 package com.huang.service;
 
+import cn.dev33.satoken.stp.SaTokenInfo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.huang.model.dto.user.UserQueryRequest;
@@ -54,23 +55,22 @@ public interface UserService extends IService<User> {
      * @param request
      * @return
      */
-    User getLoginUser(HttpServletRequest request);
+    // TODO 整合sa-token,该方法已废弃
+    User getLoginUser(long userId);
 
     /**
      * 获取当前登录用户（允许未登录）
      *
-     * @param request
      * @return
      */
-    User getLoginUserPermitNull(HttpServletRequest request);
+    User getLoginUserPermitNull(Long userId);
 
     /**
      * 是否为管理员
      *
-     * @param request
      * @return
      */
-    boolean isAdmin(HttpServletRequest request);
+    boolean isAdmin(Long userId);
 
     /**
      * 是否为管理员
@@ -93,7 +93,8 @@ public interface UserService extends IService<User> {
      *
      * @return
      */
-    LoginUserVO getLoginUserVO(User user);
+
+    LoginUserVO getLoginUserVO(User user, SaTokenInfo tokenInfo);
 
     /**
      * 获取脱敏的用户信息

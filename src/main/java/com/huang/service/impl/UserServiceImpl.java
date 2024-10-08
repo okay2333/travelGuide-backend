@@ -1,5 +1,7 @@
 package com.huang.service.impl;
 
+import cn.dev33.satoken.stp.SaTokenInfo;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -105,8 +107,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 3. 记录用户的登录态
-        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
-        return this.getLoginUserVO(user);
+        //  request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        // 第1步，先登录上
+        StpUtil.login(user.getId());
+        // 第2步，获取 Token  相关参数
+        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+        // 第3步，返回给前端
+        return this.getLoginUserVO(user,tokenInfo);
     }
 
     @Override
@@ -137,27 +144,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             // 记录用户的登录态
             request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
-            return getLoginUserVO(user);
+            return getLoginUserVO(user,null);
         }
     }
 
     /**
      * 获取当前登录用户
      *
-     * @param request
      * @return
      */
     @Override
-    public User getLoginUser(HttpServletRequest request) {
+    public User getLoginUser(long userId) {
         // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
+        if (!StpUtil.isLogin()) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
+        User currentUser = this.getById(userId);
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -167,33 +170,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 获取当前登录用户（允许未登录）
      *
-     * @param request
      * @return
      */
     @Override
-    public User getLoginUserPermitNull(HttpServletRequest request) {
+    public User getLoginUserPermitNull(Long userId) {
         // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            return null;
+        if (!StpUtil.isLogin()) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
-        // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
         return this.getById(userId);
     }
 
     /**
      * 是否为管理员
      *
-     * @param request
      * @return
      */
     @Override
-    public boolean isAdmin(HttpServletRequest request) {
+    public boolean isAdmin(Long userId) {
         // 仅管理员可查询
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User user = (User) userObj;
+        User user = (User) this.getById(userId);
         return isAdmin(user);
     }
 
@@ -218,12 +214,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public LoginUserVO getLoginUserVO(User user) {
+    public LoginUserVO getLoginUserVO(User user,SaTokenInfo tokenInfo) {
         if (user == null) {
             return null;
         }
         LoginUserVO loginUserVO = new LoginUserVO();
         BeanUtils.copyProperties(user, loginUserVO);
+        loginUserVO.setTokenInfo(tokenInfo);
         return loginUserVO;
     }
 

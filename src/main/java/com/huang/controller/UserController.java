@@ -1,5 +1,6 @@
 package com.huang.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.huang.common.BaseResponse;
 import com.huang.common.DeleteRequest;
@@ -129,16 +130,13 @@ public class UserController {
     /**
      * 用户注销
      *
-     * @param request
      * @return
      */
     @PostMapping("/logout")
-    public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
-        if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        boolean result = userService.userLogout(request);
-        return ResultUtils.success(result);
+    public BaseResponse<Boolean> userLogout() {
+//        boolean result = userService.userLogout(request);
+        StpUtil.logout();
+        return ResultUtils.success(true);
     }
 
     /**
@@ -147,11 +145,12 @@ public class UserController {
      * @param request
      * @return
      */
-    @GetMapping("/get/login")
-    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
-        User user = userService.getLoginUser(request);
-        return ResultUtils.success(userService.getLoginUserVO(user));
-    }
+    // TODO 待会看
+//    @GetMapping("/get/login")
+//    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+//        User user = userService.getLoginUser(request);
+//        return ResultUtils.success(userService.getLoginUserVO(user,null));
+//    }
 
     // endregion
 
@@ -300,19 +299,16 @@ public class UserController {
      * 更新个人信息
      *
      * @param userUpdateMyRequest
-     * @param request
      * @return
      */
     @PostMapping("/update/my")
-    public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest) {
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
         User user = new User();
         BeanUtils.copyProperties(userUpdateMyRequest, user);
-        user.setId(loginUser.getId());
+        user.setId(StpUtil.getLoginIdAsLong());
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
