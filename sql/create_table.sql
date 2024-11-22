@@ -88,7 +88,6 @@ create table if not exists reservations_time
     stock      bigint                         null comment '库存数量',
     instructions    text                               null comment '预约须知',
     openDateTime datetime default CURRENT_TIMESTAMP not null comment '开放日期',
-    timeSlot       varchar(1024)                      null comment '时间段（json 数组）',
     createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     isDelete   tinyint  default 0                 not null comment '是否删除'
@@ -99,6 +98,7 @@ create table if not exists reservations_time_travelers
 (
     id         bigint auto_increment comment 'id' primary key,
     userId     bigint                             not null comment '创建用户 id',
+    reservationsId bigint                            null comment '预约表 id',
     reservationsTimeId      bigint                         null comment '预约时间表 id',
     fullName      varchar(512)                       null comment '姓名',
     idNumber     varchar(512)                       null comment '身份证',

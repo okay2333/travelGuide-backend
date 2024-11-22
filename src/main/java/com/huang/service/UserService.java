@@ -35,10 +35,9 @@ public interface UserService extends IService<User> {
      *
      * @param userAccount  用户账户
      * @param userPassword 用户密码
-     * @param request
      * @return 脱敏后的用户信息
      */
-    LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
+    LoginUserVO userLogin(String userAccount, String userPassword);
 
     /**
      * 用户登录（微信开放平台）
@@ -52,7 +51,7 @@ public interface UserService extends IService<User> {
     /**
      * 获取当前登录用户
      *
-     * @param request
+     * @param userId
      * @return
      */
     // TODO 整合sa-token,该方法已废弃
@@ -120,4 +119,6 @@ public interface UserService extends IService<User> {
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
+
+    User getByUserById(Long loginId);
 }

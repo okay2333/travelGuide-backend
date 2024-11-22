@@ -148,4 +148,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # generator code
-src/main/generator/
+generator/generator/

@@ -24,6 +24,11 @@ public class PostEditRequest implements Serializable {
     private String title;
 
     /**
+     * 图片列表 json
+     */
+    private String covers;
+
+    /**
      * 内容
      */
     private String content;

@@ -68,8 +68,12 @@ public class PostController {
         Post post = new Post();
         BeanUtils.copyProperties(postAddRequest, post);
         List<String> tags = postAddRequest.getTags();
+        List<String> covers = postAddRequest.getCovers();
         if (tags != null) {
             post.setTags(JSONUtil.toJsonStr(tags));
+        }
+        if (covers != null) {
+            post.setCovers(JSONUtil.toJsonStr(covers));
         }
         postService.validPost(post, true);
         User loginUser = userService.getLoginUser(StpUtil.getLoginIdAsLong());
@@ -157,7 +161,7 @@ public class PostController {
     }
 
     /**
-     * 分页获取列表（仅管理员）
+     *
      *
      * @param postQueryRequest
      * @return

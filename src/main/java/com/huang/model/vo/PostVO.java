@@ -59,6 +59,11 @@ public class PostVO implements Serializable {
     private Date updateTime;
 
     /**
+     * 图片列表 json
+     */
+    private List<String> coverList;
+
+    /**
      * 标签列表
      */
     private List<String> tagList;
@@ -107,6 +112,7 @@ public class PostVO implements Serializable {
         }
         PostVO postVO = new PostVO();
         BeanUtils.copyProperties(post, postVO);
+        postVO.setCoverList(JSONUtil.toList(post.getCovers(), String.class));
         postVO.setTagList(JSONUtil.toList(post.getTags(), String.class));
         return postVO;
     }

@@ -42,10 +42,7 @@ public class ReservationsTime implements Serializable {
      */
     private Date openDateTime;
 
-    /**
-     * 时间段（json 数组）
-     */
-    private String timeSlot;
+
 
     /**
      * 创建时间

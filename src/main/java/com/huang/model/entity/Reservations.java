@@ -19,13 +19,13 @@ public class Reservations implements Serializable {
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
      * 景区名称
      */
-    private Long scenicName;
+    private String scenicName;
 
     /**
      * 预约须知

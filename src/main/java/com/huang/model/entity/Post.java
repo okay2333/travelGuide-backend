@@ -36,6 +36,11 @@ public class Post implements Serializable {
     private String content;
 
     /**
+     * 图片列表 json
+     */
+    private String covers;
+
+    /**
      * 标签列表 json
      */
     private String tags;

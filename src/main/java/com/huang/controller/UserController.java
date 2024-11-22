@@ -87,11 +87,10 @@ public class UserController {
      * 用户登录
      *
      * @param userLoginRequest
-     * @param request
      * @return
      */
     @PostMapping("/login")
-    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest) {
         if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -100,7 +99,29 @@ public class UserController {
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword);
+        return ResultUtils.success(loginUserVO);
+    }
+
+    /**
+     * 用户登录（管理员）
+     */
+    @PostMapping("/login/admin")
+    public BaseResponse<LoginUserVO> userLoginAdmin(@RequestBody UserLoginRequest userLoginRequest) {
+
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword);
+        if (!loginUserVO.getUserRole().equals(UserConstant.ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         return ResultUtils.success(loginUserVO);
     }
 
@@ -134,7 +155,6 @@ public class UserController {
      */
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout() {
-//        boolean result = userService.userLogout(request);
         StpUtil.logout();
         return ResultUtils.success(true);
     }
@@ -142,13 +162,14 @@ public class UserController {
     /**
      * 获取当前登录用户
      *
-     * @param request
+     * @param
      * @return
      */
     // TODO 待会看
 //    @GetMapping("/get/login")
-//    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
-//        User user = userService.getLoginUser(request);
+//    public BaseResponse<LoginUserVO> getLoginUser() {
+//        long userId = StpUtil.getLoginIdAsLong();
+//        User user = userService.getLoginUser(userId);
 //        return ResultUtils.success(userService.getLoginUserVO(user,null));
 //    }
 
@@ -160,12 +181,11 @@ public class UserController {
      * 创建用户
      *
      * @param userAddRequest
-     * @param request
      * @return
      */
     @PostMapping("/add")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest) {
         if (userAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -181,15 +201,17 @@ public class UserController {
     }
 
     /**
-     * 删除用户
+     * 删除用户(仅管理员)
      *
      * @param deleteRequest
-     * @param request
      * @return
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest) {
+        // 权限校验
+        if (!StpUtil.hasRole(UserConstant.ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -201,13 +223,14 @@ public class UserController {
      * 更新用户
      *
      * @param userUpdateRequest
-     * @param request
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
+        // 权限校验
+        if (!StpUtil.hasRole(UserConstant.ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -222,13 +245,15 @@ public class UserController {
      * 根据 id 获取用户（仅管理员）
      *
      * @param id
-     * @param request
      * @return
      */
     @GetMapping("/get")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<User> getUserById(long id, HttpServletRequest request) {
-        if (id <= 0) {
+    public BaseResponse<User> getUserById(Long id) {
+        // 权限校验
+        if (!StpUtil.hasRole(UserConstant.ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.getById(id);
@@ -240,12 +265,11 @@ public class UserController {
      * 根据 id 获取包装类
      *
      * @param id
-     * @param request
      * @return
      */
     @GetMapping("/get/vo")
-    public BaseResponse<UserVO> getUserVOById(long id, HttpServletRequest request) {
-        BaseResponse<User> response = getUserById(id, request);
+    public BaseResponse<UserVO> getUserVOById(long id) {
+        BaseResponse<User> response = getUserById(id);
         User user = response.getData();
         return ResultUtils.success(userService.getUserVO(user));
     }
@@ -254,13 +278,14 @@ public class UserController {
      * 分页获取用户列表（仅管理员）
      *
      * @param userQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest) {
+        // 权限校验
+        if (!StpUtil.hasRole(UserConstant.ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         long current = userQueryRequest.getCurrent();
         long size = userQueryRequest.getPageSize();
         Page<User> userPage = userService.page(new Page<>(current, size),
@@ -272,12 +297,10 @@ public class UserController {
      * 分页获取用户封装列表
      *
      * @param userQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page/vo")
-    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
         if (userQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -313,4 +336,6 @@ public class UserController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
+
 }

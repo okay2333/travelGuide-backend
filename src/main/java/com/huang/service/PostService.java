@@ -7,8 +7,6 @@ import com.huang.model.dto.post.PostQueryRequest;
 import com.huang.model.entity.Post;
 import com.huang.model.vo.PostVO;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * 帖子服务
  *
@@ -56,4 +54,11 @@ public interface PostService extends IService<Post> {
      * @return
      */
     Page<PostVO> getPostVOPage(Page<Post> postPage);
+
+    /**
+    * @author okay
+    * @description 针对表【reservations_time(预约时间表)】的数据库操作Service
+    * @createDate 2024-09-04 21:15:02
+    */
+
 }

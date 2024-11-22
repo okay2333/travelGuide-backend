@@ -30,6 +30,11 @@ public class ReservationsTimeTravelers implements Serializable {
     /**
      * 预约时间表 id
      */
+    private Long reservationsId;
+
+    /**
+     * 预约时间表 id
+     */
     private Long reservationsTimeId;
 
     /**

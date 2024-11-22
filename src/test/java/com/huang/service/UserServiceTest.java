@@ -32,4 +32,13 @@ public class UserServiceTest {
 
         }
     }
+    @Test
+    void getByUserById() {
+        long userId = 1828339688465825793L;
+        try {
+            userService.getByUserById(userId);
+        } catch (Exception e) {
+
+        }
+    }
 }
