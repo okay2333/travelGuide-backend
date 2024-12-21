@@ -17,15 +17,10 @@ import lombok.Data;
 @Data
 public class Orders implements Serializable {
     /**
-     * id
+     * id(订单号)
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 订单号
-     */
-    private String orderId;
 
     /**
      * 创建用户 id
@@ -33,9 +28,9 @@ public class Orders implements Serializable {
     private Long userId;
 
     /**
-     * 门票景点id
+     * 门票id
      */
-    private Long ticketScenicId;
+    private Long ticketId;
 
     /**
      * 订单状态

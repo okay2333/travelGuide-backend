@@ -161,7 +161,7 @@ public class PostController {
     }
 
     /**
-     *
+     * 分页获取列表（仅管理员）
      *
      * @param postQueryRequest
      * @return

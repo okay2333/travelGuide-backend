@@ -311,6 +311,13 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         return postVOPage;
     }
 
+    @Override
+    public long countMyFavourPost(Long userId) {
+        return postFavourMapper.countUserOrders(userId);
+    }
+
+
+
 }
 
 

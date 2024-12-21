@@ -165,13 +165,16 @@ public class UserController {
      * @param
      * @return
      */
-    // TODO 待会看
-//    @GetMapping("/get/login")
-//    public BaseResponse<LoginUserVO> getLoginUser() {
-//        long userId = StpUtil.getLoginIdAsLong();
-//        User user = userService.getLoginUser(userId);
-//        return ResultUtils.success(userService.getLoginUserVO(user,null));
-//    }
+    @GetMapping("/get/login")
+    public BaseResponse<LoginUserVO> getLoginUser() {
+        // 先判断是否已登录
+        if (!StpUtil.isLogin()) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        long userId = StpUtil.getLoginIdAsLong();
+        User user = userService.getLoginUser(userId);
+        return ResultUtils.success(userService.getLoginUserVO(user,null));
+    }
 
     // endregion
 

@@ -1,10 +1,14 @@
 package com.huang.model.dto.orders;
 
+import com.huang.common.PageRequest;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class OrdersQueryRequest {
+public class OrdersQueryRequest  extends PageRequest implements Serializable {
     private Long userId;            // 用户 ID
-    private Long current;           // 当前页
-    private Long pageSize;          // 每页大小
+    private Long scenicId;          // 景区 ID
+    private Integer status;         // 订单状态
+
 }

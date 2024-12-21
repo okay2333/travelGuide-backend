@@ -10,10 +10,13 @@ import com.huang.common.ResultUtils;
 import com.huang.constant.UserConstant;
 import com.huang.exception.BusinessException;
 import com.huang.exception.ThrowUtils;
+import com.huang.model.dto.post.PostQueryRequest;
 import com.huang.model.dto.reservations.ReservationsQueryRequest;
 import com.huang.model.dto.reservations.ReservationsAddRequest;
 import com.huang.model.dto.reservations.ReservationsUpdateRequest;
+import com.huang.model.entity.Post;
 import com.huang.model.entity.Reservations;
+import com.huang.model.vo.PostVO;
 import com.huang.model.vo.ReservationsVO;
 import com.huang.service.ReservationsService;
 import com.huang.service.UserService;
@@ -23,6 +26,8 @@ import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 帖子接口
@@ -38,9 +43,6 @@ public class ReservationsController {
     @Resource
     private ReservationsService reservationsService;
 
-    @Resource
-    private UserService userService;
-
     // region 增删改查
 
     /**
@@ -54,13 +56,16 @@ public class ReservationsController {
         if (reservationsAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 权限校验
+        if (!StpUtil.hasRole(UserConstant.ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         // 先判断是否已登录
         if (!StpUtil.isLogin()) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
         Reservations reservations = new Reservations();
         BeanUtils.copyProperties(reservationsAddRequest, reservations);
-
         boolean result = reservationsService.save(reservations);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         long newReservationsId = reservations.getId();
@@ -68,7 +73,7 @@ public class ReservationsController {
     }
 
     /**
-     * 删除
+     * 删除（仅管理员）
      *
      * @param deleteRequest
      * @return
@@ -77,6 +82,10 @@ public class ReservationsController {
     public BaseResponse<Boolean> deleteReservations(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 权限校验
+        if (!StpUtil.hasRole(UserConstant.ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         // 先判断是否已登录
         if (!StpUtil.isLogin()) {
@@ -87,10 +96,7 @@ public class ReservationsController {
         Reservations oldReservations = reservationsService.getById(id);
 
         ThrowUtils.throwIf(oldReservations == null, ErrorCode.NOT_FOUND_ERROR);
-        // 仅本人或管理员可删除
-        if (!userService.isAdmin(StpUtil.getLoginIdAsLong())) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
+
         boolean b = reservationsService.removeById(id);
         return ResultUtils.success(b);
     }
@@ -145,7 +151,8 @@ public class ReservationsController {
      * @return
      */
     @PostMapping("/list/page")
-    public BaseResponse<Page<Reservations>> listReservationsByPage(@RequestBody ReservationsQueryRequest reservationsQueryRequest) {
+    public BaseResponse<Page<Reservations>> listReservationsByPage(
+            @RequestBody ReservationsQueryRequest reservationsQueryRequest) {
         long current = reservationsQueryRequest.getCurrent();
         long size = reservationsQueryRequest.getPageSize();
         Page<Reservations> reservationsPage = reservationsService.page(new Page<>(current, size),
@@ -153,10 +160,30 @@ public class ReservationsController {
         return ResultUtils.success(reservationsPage);
     }
 
+    /**
+     * 分页获取列表（封装类）
+     *
+     * @param reservationsQueryRequest
+     * @return
+     */
+    @PostMapping("/list/page/vo")
+    public BaseResponse<Page<ReservationsVO>> listReservationsVOByPage(
+            @RequestBody ReservationsQueryRequest reservationsQueryRequest) {
+        long current = reservationsQueryRequest.getCurrent();
+        long size = reservationsQueryRequest.getPageSize();
+        // 限制爬虫
+        Page<Reservations> reservationsPage = reservationsService.page(new Page<>(current, size),
+                reservationsService.getQueryWrapper(reservationsQueryRequest));
+        return ResultUtils.success(reservationsService.getReservationsVOPage(reservationsPage));
+    }
 
-
-
-
-
+    /**
+     * 查询所有开放日期
+     */
+    @PostMapping("/listOpenDateTime")
+    public BaseResponse<List<String>> listOpenDateTime() {
+        List<String> openDateTimeList = reservationsService.listOpenDateTime();
+        return ResultUtils.success(openDateTimeList);
+    }
 
 }

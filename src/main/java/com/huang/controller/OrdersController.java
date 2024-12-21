@@ -1,22 +1,31 @@
 package com.huang.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.db.sql.Order;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.huang.common.BaseResponse;
 import com.huang.common.DeleteRequest;
 import com.huang.common.ErrorCode;
 import com.huang.common.ResultUtils;
+import com.huang.constant.OrdersConstant;
 import com.huang.exception.BusinessException;
 import com.huang.exception.ThrowUtils;
 import com.huang.model.dto.orders.OrdersAddRequest;
-import com.huang.model.dto.orders.OrdersEditRequest;
+import com.huang.model.dto.orders.OrdersUpdateRequest;
 import com.huang.model.dto.orders.OrdersQueryRequest;
+import com.huang.model.dto.scenic.ScenicQueryRequest;
+import com.huang.model.dto.ticket.TicketUpdateRequest;
 import com.huang.model.entity.Orders;
 import javax.annotation.Resource;
 
 
 import com.huang.model.entity.Qrcodeverification;
+import com.huang.model.entity.Scenic;
+import com.huang.model.entity.Ticket;
+import com.huang.model.vo.OrdersVO;
+import com.huang.model.vo.ScenicVO;
 import com.huang.service.FileService;
 import com.huang.service.OrdersService;
 import com.huang.service.QrcodeverificationService;
@@ -32,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -68,14 +78,8 @@ public class OrdersController {
         if (!StpUtil.isLogin()) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
-
-        Orders orders = new Orders();
-        BeanUtils.copyProperties(ordersAddRequest, orders);
-        orders.setUserId(StpUtil.getLoginIdAsLong());
-        orders.setOrderId(String.valueOf(UUID.randomUUID()));
-        orders.setOrderStatus(0);
-        boolean result = ordersService.save(orders);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        // 创建订单实时库存解决方案
+        Orders orders = ordersService.createOrders(ordersAddRequest);
         return ResultUtils.success(orders);
     }
 
@@ -99,59 +103,35 @@ public class OrdersController {
         Orders oldOrder = ordersService.getById(id);
         ThrowUtils.throwIf(oldOrder == null, ErrorCode.NOT_FOUND_ERROR);
 
-        // 仅本人或管理员可删除
-        if (!oldOrder.getUserId().equals(StpUtil.getLoginIdAsLong()) && !userService.isAdmin(StpUtil.getLoginIdAsLong())) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-
         boolean result = ordersService.removeById(id);
         return ResultUtils.success(result);
     }
 
+
     /**
-     * 更新订单
+     * 更新订单（仅管理员）
      *
-     * @param orderEditRequest
+     * @param ordersUpdateRequest
      * @return
      */
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateOrders(@RequestBody OrdersEditRequest orderEditRequest) throws IOException {
-        System.out.println("为什么不输出"+orderEditRequest);
-        if (orderEditRequest == null || orderEditRequest.getId() <= 0) {
+    public BaseResponse<Boolean> updateOrders(@RequestBody OrdersUpdateRequest ordersUpdateRequest) throws IOException {
+        if (ordersUpdateRequest == null || ordersUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-
         Orders orders = new Orders();
-        BeanUtils.copyProperties(orderEditRequest, orders);
-        long id = orderEditRequest.getId();
+        BeanUtils.copyProperties(ordersUpdateRequest, orders);
 
+        // 参数校验
+        long id = ordersUpdateRequest.getId();
         // 判断是否存在
-        Orders oldOrder = ordersService.getById(id);
-        ThrowUtils.throwIf(oldOrder == null, ErrorCode.NOT_FOUND_ERROR);
-
-        // 仅本人或管理员可更新
-        if (!oldOrder.getUserId().equals(StpUtil.getLoginIdAsLong()) && !userService.isAdmin(StpUtil.getLoginIdAsLong())) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-
-        boolean result = ordersService.updateById(orders);
-        if (orderEditRequest.getOrderStatus() == 1) {
-            System.out.println("支付成功生成二维码");
-            BufferedImage bufferedImage = QRCodeUtil.generateQRCode("订单号:" + oldOrder.getOrderId());
-            System.out.println("二维码生成成功！");
-            String QRCodeUrl = fileService.uploadQRCodeToOss(bufferedImage);
-//          插入二维码地址
-            Qrcodeverification qrcodeverification = new Qrcodeverification();
-            qrcodeverification.setOrderId(oldOrder.getOrderId());
-            qrcodeverification.setQrCode(QRCodeUrl);
-            qrcodeverification.setIsVerified(0);
-            qrcodeverification.setVerificationDate(null);
-            boolean QRCodeResult = qrcodeverificationService.save(qrcodeverification);
-            System.out.println("插入后结果"+QRCodeResult);
-            System.out.println(QRCodeUrl);
-        }
-        return ResultUtils.success(result);
+        Orders oldOrders = ordersService.getById(id);
+        ThrowUtils.throwIf(oldOrders == null, ErrorCode.NOT_FOUND_ERROR);
+//        boolean result = ordersService.updateById(orders);
+//        return ResultUtils.success(result);
+        return ordersService.updateOrders(orders);
     }
+
 
     /**
      * 根据 id 获取订单
@@ -199,6 +179,49 @@ public class OrdersController {
         return ResultUtils.success(orderPage);
     }
 
+
+    /**
+     * 分页获取列表（封装类）
+     *
+     * @param ordersQueryRequest
+     * @return
+     */
+    @PostMapping("/list/page/vo")
+    public BaseResponse<Page<OrdersVO>> listOrdersVOByPage(@RequestBody OrdersQueryRequest ordersQueryRequest) {
+        long current = ordersQueryRequest.getCurrent();
+        long size = ordersQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 101, ErrorCode.PARAMS_ERROR);
+        Page<Orders> scenicPage = ordersService.page(new Page<>(current, size),
+                ordersService.getQueryWrapper(ordersQueryRequest));
+        return ResultUtils.success(ordersService.getOrdersVOPage(scenicPage));
+    }
+
+    /**
+     * 分页个人获取列表（封装类）
+     *
+     * @return
+     */
+    @PostMapping("/list/page/my/vo")
+    public BaseResponse<List<OrdersVO>> listMyOrdersVOByPage() {
+        // 先判断是否已登录
+        if (!StpUtil.isLogin()) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", StpUtil.getLoginIdAsLong());
+        List<Orders> ordersList = ordersService.list(queryWrapper);
+        return ResultUtils.success(ordersService.getOrdersVO(ordersList));
+    }
+
+
+    @GetMapping("/count")
+    public BaseResponse<Long> getUserOrdersCount() {
+        // 获取当前登录用户ID
+        Long userId = StpUtil.getLoginIdAsLong();
+        long count = ordersService.countUserOrders(userId);
+        return ResultUtils.success(count);
+    }
     // endregion
 
  

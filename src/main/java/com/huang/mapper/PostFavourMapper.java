@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.huang.model.entity.Post;
 import com.huang.model.entity.PostFavour;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 帖子收藏数据库操作
@@ -27,7 +28,8 @@ public interface PostFavourMapper extends BaseMapper<PostFavour> {
      */
     Page<Post> listFavourPostByPage(IPage<Post> page, @Param(Constants.WRAPPER) Wrapper<Post> queryWrapper,
                                     long favourUserId);
-
+    @Select("SELECT COUNT(id) FROM post_favour WHERE userId = #{userId}")
+    long countUserOrders(Long userId);
 }
 
 

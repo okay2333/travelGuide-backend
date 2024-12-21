@@ -19,10 +19,7 @@ import com.huang.service.UserService;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 帖子收藏接口
@@ -41,8 +38,6 @@ public class PostFavourController {
     @Resource
     private PostService postService;
 
-    @Resource
-    private UserService userService;
 
     /**
      * 收藏 / 取消收藏
@@ -85,11 +80,9 @@ public class PostFavourController {
      * 获取用户收藏的帖子列表
      *
      * @param postFavourQueryRequest
-     * @param request
      */
     @PostMapping("/list/page")
-    public BaseResponse<Page<PostVO>> listFavourPostByPage(@RequestBody PostFavourQueryRequest postFavourQueryRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Page<PostVO>> listFavourPostByPage(@RequestBody PostFavourQueryRequest postFavourQueryRequest) {
         if (postFavourQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -102,5 +95,13 @@ public class PostFavourController {
         Page<Post> postPage = postFavourService.listFavourPostByPage(new Page<>(current, size),
                 postService.getQueryWrapper(postFavourQueryRequest.getPostQueryRequest()), userId);
         return ResultUtils.success(postService.getPostVOPage(postPage));
+    }
+
+    @GetMapping("/count")
+    public BaseResponse<Long> getMyFavourPostCount() {
+        // 获取当前登录用户ID
+        Long userId = StpUtil.getLoginIdAsLong();
+        long count = postService.countMyFavourPost(userId);
+        return ResultUtils.success(count);
     }
 }

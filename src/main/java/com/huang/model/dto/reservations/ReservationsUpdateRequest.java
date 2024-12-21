@@ -3,6 +3,7 @@ package com.huang.model.dto.reservations;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
 public class ReservationsUpdateRequest implements Serializable {
@@ -13,14 +14,21 @@ public class ReservationsUpdateRequest implements Serializable {
     private Long id;
 
     /**
-     * 景区名称
+     * 景区表 id
      */
-    private String scenicName;
+    private Long scenicId;
 
     /**
-     * 预约须知
+     * 库存数量
      */
-    private String instructions;
+    private Long stock;
+
+
+    /**
+     * 开放日期
+     */
+    private Date openDateTime;
+
 
 
     private static final long serialVersionUID = 1L;

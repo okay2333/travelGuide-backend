@@ -24,7 +24,7 @@ public class Qrcodeverification implements Serializable {
     /**
      * 订单号
      */
-    private String orderId;
+    private Long orderId;
 
     /**
      * 核销二维码

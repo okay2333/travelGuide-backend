@@ -2,6 +2,7 @@ package com.huang.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.huang.model.entity.Reservations;
+import org.apache.ibatis.annotations.Select;
 
 
 /**
@@ -12,8 +13,8 @@ import com.huang.model.entity.Reservations;
  */
 public interface ReservationsMapper extends BaseMapper<Reservations> {
 
-
-
+    @Select("SELECT COUNT(DISTINCT reservationsId) FROM reservations_travelers WHERE userId = #{userId}")
+    long countUserReservations(Long userId);
 }
 
 

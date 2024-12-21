@@ -1,6 +1,7 @@
 package com.huang.model.dto.reservations;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -11,17 +12,22 @@ import java.util.List;
 @Data
 public class ReservationsAddRequest implements Serializable {
 
+    /**
+     * 景区id
+     */
+    private Long scenicId;
 
     /**
-     * 景区名称
+     * 库存数量
      */
-    private String scenicName;
+    private Long stock;
 
     /**
-     * 预约须知
+     * 开放时间
      */
-    private String instructions;
+    private Date openDateTime;
 
 
     private static final long serialVersionUID = 1L;
+
 }

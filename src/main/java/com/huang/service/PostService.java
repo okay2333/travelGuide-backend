@@ -55,10 +55,7 @@ public interface PostService extends IService<Post> {
      */
     Page<PostVO> getPostVOPage(Page<Post> postPage);
 
-    /**
-    * @author okay
-    * @description 针对表【reservations_time(预约时间表)】的数据库操作Service
-    * @createDate 2024-09-04 21:15:02
-    */
 
+
+    long countMyFavourPost(Long userId);
 }

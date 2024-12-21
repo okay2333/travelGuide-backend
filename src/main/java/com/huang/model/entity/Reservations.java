@@ -4,10 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * 预约表
@@ -19,18 +18,25 @@ public class Reservations implements Serializable {
     /**
      * id
      */
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 景区名称
+     * 景区表 id
      */
-    private String scenicName;
+    private Long scenicId;
 
     /**
-     * 预约须知
+     * 库存数量
      */
-    private String instructions;
+    private Long stock;
+
+
+    /**
+     * 开放日期
+     */
+    private Date openDateTime;
+
 
     /**
      * 创建时间

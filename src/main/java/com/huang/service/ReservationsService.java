@@ -1,10 +1,13 @@
 package com.huang.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.huang.model.dto.reservations.ReservationsQueryRequest;
 import com.huang.model.entity.Reservations;
 import com.huang.model.vo.ReservationsVO;
+
+import java.util.List;
 
 /**
  * 帖子服务
@@ -30,8 +33,6 @@ public interface ReservationsService extends IService<Reservations> {
      */
     QueryWrapper<Reservations> getQueryWrapper(ReservationsQueryRequest reservationsQueryRequest);
 
-
-
     /**
      * 获取帖子封装
      *
@@ -40,5 +41,10 @@ public interface ReservationsService extends IService<Reservations> {
      */
     ReservationsVO getReservationsVO(Reservations reservations);
 
+    List<String> listOpenDateTime();
 
+    Page<ReservationsVO> getReservationsVOPage(Page<Reservations> reservationsPage);
+
+
+    void updateReservationsCount(String operation, Long reservationsId,int count);
 }
