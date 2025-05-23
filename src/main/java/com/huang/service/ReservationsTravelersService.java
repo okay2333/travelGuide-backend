@@ -32,4 +32,6 @@ public interface ReservationsTravelersService extends IService<ReservationsTrave
     void validAddRequest(ReservationsTravelersAddRequest reservationsTravelersAddRequest);
 
     boolean deleteByReservationsId(long id);
+
+    List<ReservationsTravelersVO> byAllUserId(Long reservationsId);
 }

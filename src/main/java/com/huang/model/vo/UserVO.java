@@ -30,6 +30,11 @@ public class UserVO implements Serializable {
     private String userName;
 
     /**
+     * 用户账号
+     */
+    private String userAccount;
+
+    /**
      * 用户头像
      */
     private String userAvatar;
@@ -40,6 +45,11 @@ public class UserVO implements Serializable {
     private String userProfile;
 
     /**
+     * 手机号
+     */
+    private String phoneNumber;
+
+    /**
      * 用户角色：user/admin/ban
      */
     private String userRole;
@@ -48,6 +58,11 @@ public class UserVO implements Serializable {
      * 创建时间
      */
     private Date createTime;
+
+    /**
+     * 更新时间时间
+     */
+    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 

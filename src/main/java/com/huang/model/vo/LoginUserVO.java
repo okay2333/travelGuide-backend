@@ -40,6 +40,8 @@ public class LoginUserVO implements Serializable {
      */
     private String userRole;
 
+    private String phoneNumber;
+
     /**
      * 创建时间
      */

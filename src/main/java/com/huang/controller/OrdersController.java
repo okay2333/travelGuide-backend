@@ -74,6 +74,9 @@ public class OrdersController {
         if (ordersAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        if (ordersAddRequest.getQuantity() == 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         // 先判断是否已登录
         if (!StpUtil.isLogin()) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);

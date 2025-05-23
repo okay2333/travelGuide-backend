@@ -109,6 +109,66 @@ public class ReservationsTravelersServiceImpl extends ServiceImpl<ReservationsTr
         return new ArrayList<>(reservationsMap.values());
     }
 
+
+    @Override
+    public List<ReservationsTravelersVO> byAllUserId(Long reservationsId) {
+        System.out.println("这是byAllUserId"+reservationsId);
+        QueryWrapper<ReservationsTravelers> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("reservationsId", reservationsId);
+        List<ReservationsTravelers> results = reservationsTravelersMapper.selectList(queryWrapper);
+
+        if (results == null || results.isEmpty()) {
+            return null;
+        }
+
+        Map<Long, ReservationsTravelersVO> reservationsMap = new HashMap<>();
+        for (ReservationsTravelers rt : results) {
+            ReservationsTravelersVO vo = reservationsMap.get(rt.getReservationsId());
+            if (vo == null) {
+                vo = new ReservationsTravelersVO();
+                vo.setId(rt.getId());
+                vo.setUserId(rt.getUserId());
+                vo.setReservationsId(rt.getReservationsId());
+                vo.setCreateTime(rt.getCreateTime());
+                vo.setUpdateTime(rt.getUpdateTime());
+                vo.setTravelerList(new ArrayList<>());
+
+                // Fetch Reservations object
+                Reservations reservations = reservationsMapper.selectById(rt.getReservationsId());
+                if (reservations != null) {
+                    ReservationsVO reservationsVO = new ReservationsVO();
+                    reservationsVO.setId(reservations.getId());
+                    reservationsVO.setScenicId(reservations.getScenicId());
+                    reservationsVO.setStock(reservations.getStock());
+                    reservationsVO.setOpenDateTime(reservations.getOpenDateTime());
+                    reservationsVO.setCreateTime(reservations.getCreateTime());
+                    reservationsVO.setUpdateTime(reservations.getUpdateTime());
+
+                    Scenic scenic = scenicMapper.selectById(reservations.getScenicId());
+                    if (scenic != null) {
+                        ScenicVO scenicVO = new ScenicVO();
+                        scenicVO.setId(scenic.getId());
+                        scenicVO.setAddress(scenic.getAddress());
+                        scenicVO.setScenicName(scenic.getScenicName());
+                        reservationsVO.setScenicVO(scenicVO);
+                    }
+
+                    vo.setReservationsVO(reservationsVO);
+                }
+
+                reservationsMap.put(rt.getReservationsId(), vo);
+            }
+            Traveler traveler = new Traveler();
+            traveler.setFullName(rt.getFullName());
+            traveler.setIdNumber(rt.getIdNumber());
+            traveler.setPhoneNumber(rt.getPhoneNumber());
+            vo.getTravelerList().add(traveler);
+        }
+
+        return new ArrayList<>(reservationsMap.values());
+    }
+
+
     @Override
     public long countUserReservations(Long userId) {
         return reservationsMapper.countUserReservations(userId);
@@ -133,6 +193,8 @@ public class ReservationsTravelersServiceImpl extends ServiceImpl<ReservationsTr
         reservationsService.updateReservationsCount("delete", reservationsId, (int) count);
         return this.remove(queryWrapper);
     }
+
+
 }
 
 

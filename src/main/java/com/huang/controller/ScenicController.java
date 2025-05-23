@@ -55,6 +55,7 @@ public class ScenicController {
      */
     @PostMapping("/add")
     public BaseResponse<Long> addScenic(@RequestBody ScenicAddRequest scenicAddRequest) {
+        System.out.println("添加"+scenicAddRequest);
         if (scenicAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -64,15 +65,15 @@ public class ScenicController {
         }
         Scenic scenic = new Scenic();
         BeanUtils.copyProperties(scenicAddRequest, scenic);
-        List<String> carouselImages = scenicAddRequest.getCarouselImages();
-        List<String> tags = scenicAddRequest.getTags();
+        List<String> carouselImages = scenicAddRequest.getCarouselImagesList();
+        List<String> tags = scenicAddRequest.getTagList();
         if (tags != null) {
             scenic.setTags(JSONUtil.toJsonStr(tags));
         }
         if (carouselImages != null) {
             scenic.setCarouselImages(JSONUtil.toJsonStr(carouselImages));
         }
-        scenicService.validScenic(scenic, true);
+//        scenicService.validScenic(scenic, true);
         boolean result = scenicService.save(scenic);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         long newScenicId = scenic.getId();
@@ -201,7 +202,7 @@ public class ScenicController {
         long current = scenicQueryRequest.getCurrent();
         long size = scenicQueryRequest.getPageSize();
         // 限制爬虫
-        ThrowUtils.throwIf(size > 101, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(size > 1000, ErrorCode.PARAMS_ERROR);
         Page<Scenic> scenicPage = scenicService.page(new Page<>(current, size),
                 scenicService.getQueryWrapper(scenicQueryRequest));
         return ResultUtils.success(scenicService.getScenicVOPage(scenicPage));

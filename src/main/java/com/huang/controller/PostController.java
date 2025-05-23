@@ -2,6 +2,7 @@ package com.huang.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.huang.annotation.AuthCheck;
 import com.huang.common.BaseResponse;
@@ -15,11 +16,14 @@ import com.huang.model.dto.post.PostAddRequest;
 import com.huang.model.dto.post.PostEditRequest;
 import com.huang.model.dto.post.PostQueryRequest;
 import com.huang.model.dto.post.PostUpdateRequest;
+import com.huang.model.entity.FeedBack;
 import com.huang.model.entity.Post;
 import com.huang.model.entity.User;
 import com.huang.model.vo.PostVO;
 import com.huang.service.PostService;
 import com.huang.service.UserService;
+
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -267,7 +271,6 @@ public class PostController {
         Post oldPost = postService.getById(id);
         ThrowUtils.throwIf(oldPost == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
-        // todo 验证用户权限
         if (!oldPost.getUserId().equals(StpUtil.getLoginIdAsLong()) && !userService.isAdmin(StpUtil.getLoginIdAsLong())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
@@ -275,4 +278,17 @@ public class PostController {
         return ResultUtils.success(result);
     }
 
+    @GetMapping("/list/my/page")
+    public BaseResponse<List<PostVO>> listMyPostVOByPage() {
+        long userId = StpUtil.getLoginIdAsLong();
+        QueryWrapper<Post> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId);
+        List<Post> postList = postService.list(queryWrapper);
+        List<PostVO> postVOList = new ArrayList<>();
+        postList.forEach(post -> {
+            PostVO postVO = postService.getPostVO(post);
+            postVOList.add(postVO);
+        });
+        return ResultUtils.success(postVOList);
+    }
 }

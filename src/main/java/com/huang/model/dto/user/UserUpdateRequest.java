@@ -31,10 +31,14 @@ public class UserUpdateRequest implements Serializable {
      */
     private String userProfile;
 
+    private String userPassword;
+
     /**
      * 用户角色：user/admin/ban
      */
     private String userRole;
+
+    private String phoneNumber;
 
     private static final long serialVersionUID = 1L;
 }

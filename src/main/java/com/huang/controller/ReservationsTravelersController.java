@@ -177,6 +177,19 @@ public class ReservationsTravelersController {
         List<ReservationsTravelersVO> reservationsTravelers = reservationsTravelersService.byUserId();
         return ResultUtils.success(reservationsTravelers);
     }
+
+
+    /**
+     * 查询所有预约记录
+     *
+     * @return
+     */
+    @GetMapping("/list/page/byAllUserId")
+    public BaseResponse<List<ReservationsTravelersVO>> listReservationsTimeByAllUser(Long reservationsId) {
+        System.out.println("reservationsId = " + reservationsId);
+        List<ReservationsTravelersVO> reservationsTravelers = reservationsTravelersService.byAllUserId(reservationsId);
+        return ResultUtils.success(reservationsTravelers);
+    }
     //
 
     @GetMapping("/count")

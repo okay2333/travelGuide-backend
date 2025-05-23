@@ -46,8 +46,6 @@ import static com.huang.service.impl.UserServiceImpl.SALT;
 /**
  * 用户接口
  *
- * 
- * 
  */
 @RestController
 @RequestMapping("/user")
@@ -124,6 +122,7 @@ public class UserController {
         }
         return ResultUtils.success(loginUserVO);
     }
+
 
     /**
      * 用户登录（微信开放平台）
@@ -230,6 +229,7 @@ public class UserController {
      */
     @PostMapping("/update")
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
+        System.out.println("userUpdateRequest = " + userUpdateRequest);
         // 权限校验
         if (!StpUtil.hasRole(UserConstant.ADMIN_ROLE)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -239,6 +239,11 @@ public class UserController {
         }
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
+        System.out.println("拷贝后user = " + user);
+        if (StringUtils.isNotBlank(user.getUserPassword())) {
+            String encryptPassword = DigestUtils.md5DigestAsHex((SALT + user.getUserPassword()).getBytes());
+            user.setUserPassword(encryptPassword);
+        }
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
@@ -265,7 +270,7 @@ public class UserController {
     }
 
     /**
-     * 根据 id 获取包装类
+         * 根据 id 获取包装类
      *
      * @param id
      * @return
@@ -329,6 +334,7 @@ public class UserController {
      */
     @PostMapping("/update/my")
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest) {
+        System.out.println("userUpdateMyRequest = " + userUpdateMyRequest);
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

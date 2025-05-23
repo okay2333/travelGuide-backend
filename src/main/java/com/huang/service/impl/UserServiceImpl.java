@@ -88,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        if (userAccount.length() < 4) {
+        if (userAccount.length() < 2) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
         }
         if (userPassword.length() < 8) {
@@ -270,6 +270,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public User getByUserById(Long loginId) {
         return  this.getById(loginId);
+    }
+
+    @Override
+    public boolean verifyPhoneNumber(String phoneNumber) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phoneNumber", phoneNumber);
+        User user = this.getOne(queryWrapper);
+        if (user != null) {
+            return true;
+        }
+        return false;
     }
 
 

@@ -121,4 +121,6 @@ public interface UserService extends IService<User> {
 
 
     User getByUserById(Long loginId);
+
+    boolean verifyPhoneNumber(String phoneNumber);
 }

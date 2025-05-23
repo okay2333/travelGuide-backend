@@ -10,7 +10,7 @@ public class ScenicAddRequest implements Serializable {
         /**
         * 轮播图（JSON数组或逗号分隔的字符串）
         */
-        private List<String> carouselImages;
+        private List<String> carouselImagesList;
 
         /**
         * 景点名称
@@ -20,7 +20,7 @@ public class ScenicAddRequest implements Serializable {
         /**
         * 标签（逗号分隔）
         */
-        private  List<String> tags;
+        private  List<String> tagList;
 
         /**
         * 开放时间
